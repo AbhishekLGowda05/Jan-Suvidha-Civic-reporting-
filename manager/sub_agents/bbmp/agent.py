@@ -4,10 +4,9 @@ import os
 import sys
 from google.adk.agents import Agent
 
-# This adds the parent directory (SIH) to the Python path
-# so we can import the tools module from the top-level tools folder.
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-from tools.tools import query_vector_database, get_report_details_from_db
+# Add the correct path to tools
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+from manager.tools.tools import query_vector_database, get_report_details_from_db
 
 # --- Define the BBMP Agent ---
 bbmp_agent = Agent(
@@ -29,6 +28,8 @@ bbmp_agent = Agent(
 
     Do not answer questions about other departments like electricity (BESCOM) or water supply (BWSSB).
     Base your answers strictly on the information retrieved from your tools.
+    
+    If no reports are found, inform the user that no relevant reports were found in the database.
     """,
     tools=[
         query_vector_database,
