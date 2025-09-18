@@ -3,10 +3,10 @@
 from google.adk.agents import Agent
 
 # Import the specialist sub-agent instances that this manager will orchestrate
-from .sub_agents.bbmp.agent import bbmp_agent
-from .sub_agents.bescom.agent import bescom_agent
-from .sub_agents.btp.agent import btp_agent
-from .sub_agents.bwhsp.agent import bwssb_agent
+from .sub_agents.bbmp.agent import bbmp
+from .sub_agents.bescom.agent import bescom
+from .sub_agents.btp.agent import btp
+from .sub_agents.bwhsp.agent import bwhsp
 
 # --- Define the Root/Manager Agent ---
 root_agent = Agent(
@@ -29,10 +29,10 @@ root_agent = Agent(
     """,
     # The list of agents this manager can delegate tasks to.
     sub_agents=[
-        bbmp_agent,
-        bescom_agent,
-        btp_agent,
-        bwssb_agent,
+        bbmp,
+        bescom,
+        btp,
+        bwhsp,
     ],
     # The manager agent itself does not need direct access to the database tools.
     # Its "tools" are its sub-agents.
