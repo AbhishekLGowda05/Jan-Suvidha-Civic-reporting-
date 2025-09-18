@@ -1,0 +1,44 @@
+# Virtual Environment
+.venv/
+
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Database Files
+*.db
+
+scah_vectordb/
+
+# Environment Variables
+.env
+.env.local
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Large data files
+*.csv
+*.json
+*.pickle
+*.pkl
