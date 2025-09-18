@@ -9,8 +9,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from manager.tools.tools import query_vector_database, get_report_details_from_db
 
 # --- Define the BBMP Agent ---
-bbmp_agent = Agent(
-    name="bbmp_agent",
+bbmp = Agent(
+    name="bbmp",
     model="gemini-1.5-flash",
     description="Specialist agent for BBMP (Bruhat Bengaluru Mahanagara Palike) civic issues.",
     instruction="""

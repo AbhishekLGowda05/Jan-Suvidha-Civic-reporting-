@@ -1,17 +1,14 @@
-# sub_agents/bwhsp/agent.py
-
 import os
 import sys
 from google.adk.agents import Agent
 
-# This adds the parent directory (SIH) to the Python path
-# so we can import the tools module from the top-level tools folder.
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-from tools.tools import query_vector_database, get_report_details_from_db
+# Add the correct path to tools - go up 3 levels to project root
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+from manager.tools.tools import query_vector_database, get_report_details_from_db
 
 # --- Define the BWSSB Agent ---
-bwssb_agent = Agent(
-    name="bwssb_agent",
+bwhsp = Agent(
+    name="bwshp",
     model="gemini-1.5-flash",
     description="Specialist agent for BWSSB (Bangalore Water Supply and Sewerage Board) related issues.",
     instruction="""

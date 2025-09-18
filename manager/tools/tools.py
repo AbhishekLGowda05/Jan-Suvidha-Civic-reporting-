@@ -1,5 +1,6 @@
-# tools/tools.py
+# manager/tools/tools.py
 
+import os
 import psycopg2
 import chromadb
 from sentence_transformers import SentenceTransformer
@@ -10,6 +11,13 @@ from decimal import Decimal
 _embedding_model = None
 _chroma_client = None
 _report_collection = None
+
+def get_database_path():
+    """Get the correct path to the vector database"""
+    current_file = os.path.abspath(__file__)
+    # Go up from tools/tools.py to manager/ to project root
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_file)))
+    return os.path.join(project_root, "scah_vectordb")
 
 def get_embedding_model():
     """
@@ -28,9 +36,9 @@ def get_report_collection():
     """
     global _chroma_client, _report_collection
     if _report_collection is None:
-        print("Initializing ChromaDB client for the first time...")
-        _chroma_client = chromadb.PersistentClient(path="./scah_vectordb")
-        # FIX: Changed _client to _chroma_client
+        db_path = get_database_path()
+        print(f"Initializing ChromaDB client at: {db_path}")
+        _chroma_client = chromadb.PersistentClient(path=db_path)
         _report_collection = _chroma_client.get_or_create_collection(name="scah_reports")
         print("ChromaDB client ready.")
     return _report_collection
@@ -50,6 +58,10 @@ def query_vector_database(query_text: str, department: str, n_results: int = 5) 
         # Check if collection has any documents
         collection_count = collection.count()
         print(f"Total documents in collection: {collection_count}")
+        
+        if collection_count == 0:
+            print("No documents found in vector database!")
+            return []
         
         query_embedding = model.encode(query_text).tolist()
         results = collection.query(
@@ -121,9 +133,24 @@ def debug_database_status():
     Debug function to check database status
     """
     try:
+        db_path = get_database_path()
+        print(f"Database path: {db_path}")
+        
+        if not os.path.exists(db_path):
+            print(f"ERROR: Database directory does not exist at {db_path}")
+            return
+        
         # Check ChromaDB
-        client = chromadb.PersistentClient(path="./scah_vectordb")
-        collection = client.get_collection(name="scah_reports")
+        client = chromadb.PersistentClient(path=db_path)
+        
+        try:
+            collection = client.get_collection(name="scah_reports")
+        except Exception as e:
+            print(f"Collection 'scah_reports' not found: {e}")
+            collections = client.list_collections()
+            print(f"Available collections: {[c.name for c in collections]}")
+            return
+            
         count = collection.count()
         print(f"ChromaDB has {count} documents")
         
@@ -133,20 +160,26 @@ def debug_database_status():
             print("Sample documents:")
             for i, (doc_id, metadata) in enumerate(zip(sample['ids'], sample['metadatas'])):
                 print(f"  ID: {doc_id}, Department: {metadata.get('department', 'N/A')}")
+        else:
+            print("No documents in collection!")
+            return
         
         # Check PostgreSQL
-        conn = psycopg2.connect("dbname=scah_prototype user=abhisheklgowda")
-        cur = conn.cursor()
-        cur.execute("SELECT COUNT(*) FROM Citizen_Reports;")
-        pg_count = cur.fetchone()[0]
-        print(f"PostgreSQL has {pg_count} reports")
-        
-        cur.execute("SELECT DISTINCT department FROM Citizen_Reports;")
-        departments = cur.fetchall()
-        print(f"Departments in PostgreSQL: {[dept[0] for dept in departments]}")
-        
-        cur.close()
-        conn.close()
+        try:
+            conn = psycopg2.connect("dbname=scah_prototype user=abhisheklgowda")
+            cur = conn.cursor()
+            cur.execute("SELECT COUNT(*) FROM Citizen_Reports;")
+            pg_count = cur.fetchone()[0]
+            print(f"PostgreSQL has {pg_count} reports")
+            
+            cur.execute("SELECT DISTINCT department FROM Citizen_Reports;")
+            departments = cur.fetchall()
+            print(f"Departments in PostgreSQL: {[dept[0] for dept in departments]}")
+            
+            cur.close()
+            conn.close()
+        except Exception as e:
+            print(f"PostgreSQL connection error: {e}")
         
     except Exception as e:
         print(f"Error during debug: {e}")
